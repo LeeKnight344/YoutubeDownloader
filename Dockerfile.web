@@ -1,0 +1,27 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+
+COPY Directory.Build.props Directory.Packages.props NuGet.config ./
+COPY YoutubeDownloader.Core/YoutubeDownloader.Core.csproj YoutubeDownloader.Core/
+COPY YoutubeDownloader.Web/YoutubeDownloader.Web.csproj YoutubeDownloader.Web/
+RUN dotnet restore YoutubeDownloader.Web/YoutubeDownloader.Web.csproj
+
+COPY YoutubeDownloader.Core/ YoutubeDownloader.Core/
+COPY YoutubeDownloader.Web/ YoutubeDownloader.Web/
+RUN dotnet publish YoutubeDownloader.Web/YoutubeDownloader.Web.csproj \
+    --configuration Release \
+    --no-restore \
+    --output /app/publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends ffmpeg ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir -p /tmp/youtube-downloader \
+    && chown -R 1000:1000 /tmp/youtube-downloader
+
+WORKDIR /app
+COPY --from=build /app/publish ./
+ENV ASPNETCORE_HTTP_PORTS=8080
+USER 1000:1000
+ENTRYPOINT ["dotnet", "YoutubeDownloader.Web.dll"]

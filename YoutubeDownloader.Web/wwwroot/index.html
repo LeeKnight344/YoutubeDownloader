@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Video Converter</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+        color: #202b28;
+        background: #f3f7f4;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background-image: repeating-linear-gradient(135deg, transparent 0 31px, #e8efeb 31px 32px);
+      }
+
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 22px clamp(20px, 5vw, 72px);
+        border-bottom: 1px solid #d8e2dc;
+        background: #f8faf8;
+      }
+
+      .brand { font-size: 15px; font-weight: 700; }
+      .local-label { color: #537167; font-size: 12px; }
+
+      main {
+        width: min(100% - 40px, 620px);
+        margin: clamp(56px, 12vh, 112px) auto 0;
+      }
+
+      .eyebrow { color: #28664e; font-size: 12px; font-weight: 700; }
+      h1 { margin: 12px 0; font-size: 34px; line-height: 1.15; }
+      .intro { max-width: 52ch; color: #596762; line-height: 1.6; }
+
+      form {
+        display: grid;
+        gap: 18px;
+        margin-top: 34px;
+        padding-top: 24px;
+        border-top: 1px solid #cddad2;
+      }
+
+      label { display: grid; gap: 8px; font-size: 13px; font-weight: 650; }
+      input, select, button {
+        min-height: 48px;
+        border: 1px solid #aabbb1;
+        border-radius: 4px;
+        font: inherit;
+      }
+
+      input, select { width: 100%; padding: 0 12px; color: inherit; background: #fff; }
+      button {
+        justify-self: start;
+        padding: 0 22px;
+        border-color: #205b46;
+        color: white;
+        background: #205b46;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover { background: #174633; }
+      input:focus-visible, select:focus-visible, button:focus-visible { outline: 3px solid #e6a45b; outline-offset: 2px; }
+      .notice { margin-top: 22px; color: #596762; font-size: 12px; line-height: 1.6; }
+
+      @media (max-width: 520px) {
+        header { align-items: flex-start; gap: 8px; flex-direction: column; }
+        h1 { font-size: 29px; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="brand">Media Converter</div>
+      <div class="local-label">LOCAL INSTANCE</div>
+    </header>
+    <main>
+      <div class="eyebrow">SINGLE VIDEO</div>
+      <h1>Convert a video</h1>
+      <p class="intro">Choose MP3 audio or MP4 video. The converted file downloads in your browser when it is ready.</p>
+      <form action="/api/download" method="post" target="_blank">
+        <label for="url">
+          YouTube video URL
+          <input id="url" name="url" type="url" placeholder="https://www.youtube.com/watch?v=..." required />
+        </label>
+        <label for="format">
+          Output format
+          <select id="format" name="format">
+            <option value="mp3">MP3 audio</option>
+            <option value="mp4">MP4 video, highest available quality</option>
+          </select>
+        </label>
+        <button type="submit">Convert and download</button>
+      </form>
+      <p class="notice">Only convert videos you own or are authorized to download. Each request handles one video.</p>
+    </main>
+  </body>
+</html>
