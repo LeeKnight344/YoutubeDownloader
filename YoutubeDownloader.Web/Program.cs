@@ -49,9 +49,29 @@ app.MapPost("/api/download", async (HttpRequest request, CancellationToken cance
         cancellationToken: cancellationToken
     );
 
-    var outputDirectory = Path.Combine(Path.GetTempPath(), "youtube-downloader");
+    var safeTitle = new string(
+        video.Title
+            .Select(character =>
+                char.IsControl(character)
+                || character is '/' or '\\' or ':' or '*' or '?' or '"' or '<' or '>' or '|'
+                    ? '_'
+                    : character
+            )
+            .ToArray()
+    );
+    if (safeTitle.Length > 120)
+        safeTitle = safeTitle[..120];
+    if (string.IsNullOrWhiteSpace(safeTitle))
+        safeTitle = "video";
+
+    var outputDirectory = format == "mp3"
+        ? Environment.GetEnvironmentVariable("MUSIC_OUTPUT_DIR") ?? "/downloads/music"
+        : Environment.GetEnvironmentVariable("MOVIES_OUTPUT_DIR") ?? "/downloads/movies";
     Directory.CreateDirectory(outputDirectory);
-    var outputPath = Path.Combine(outputDirectory, $"{video.Id}-{Guid.NewGuid():N}.{format}");
+    var outputPath = Path.Combine(
+        outputDirectory,
+        $"{safeTitle}-{video.Id}-{Guid.NewGuid():N}.{format}"
+    );
 
     try
     {
@@ -72,28 +92,13 @@ app.MapPost("/api/download", async (HttpRequest request, CancellationToken cance
         throw;
     }
 
-    var safeTitle = new string(
-        video.Title
-            .Select(character =>
-                char.IsControl(character)
-                || character is '/' or '\\' or ':' or '*' or '?' or '"' or '<' or '>' or '|'
-                    ? '_'
-                    : character
-            )
-            .ToArray()
-    );
-    if (safeTitle.Length > 120)
-        safeTitle = safeTitle[..120];
-    if (string.IsNullOrWhiteSpace(safeTitle))
-        safeTitle = "video";
-
     var fileStream = new FileStream(
         outputPath,
         FileMode.Open,
         FileAccess.Read,
         FileShare.Read,
         81920,
-        FileOptions.DeleteOnClose
+        FileOptions.SequentialScan
     );
 
     return Results.File(
